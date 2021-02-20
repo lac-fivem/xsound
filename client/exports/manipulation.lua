@@ -40,15 +40,19 @@ end
 exports('Destroy', Destroy)
 
 function Resume(name_)
-    SendNUIMessage({
-        status = "resume",
-        name = name_
-    })
-    soundInfo[name_].playing = true
-    soundInfo[name_].paused = false
-
-    if globalOptionsCache[name_] ~= nil and globalOptionsCache[name_].onPlayResume ~= nil then
-        globalOptionsCache[name_].onPlayResume(getInfo(name_))
+    if soundInfo[name_] ~= nil then
+        SendNUIMessage({
+            status = "resume",
+            name = name_
+        })
+        soundInfo[name_].playing = true
+        soundInfo[name_].paused = false
+    
+        if globalOptionsCache[name_] ~= nil and globalOptionsCache[name_].onPlayResume ~= nil then
+            globalOptionsCache[name_].onPlayResume(getInfo(name_))
+        end
+    else
+        print(name_, "soundInfo doesnt exist. Cannot Resume")
     end
 end
 

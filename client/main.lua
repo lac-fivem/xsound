@@ -77,3 +77,13 @@ CreateThread(function()
         end
     end
 end)
+
+
+-- Custom NUI Callbacks
+
+RegisterNUICallback('youtubeReady', function (data)
+    TriggerEvent("xsound:onYoutubeReady", data.title, data.musicId, data.name)
+end)
+RegisterNUICallback('youtubeError', function (data)
+    TriggerEvent("xsound:onYoutubeError", data.code, data.link, data.musicId, data.name)
+end)

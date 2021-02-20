@@ -108,12 +108,12 @@ class SoundPlayer
             this.isYoutubeReady(false);
             $("#" + this.div_id).remove();
             $("body").append("<div id='"+ this.div_id +"'></div>");
+            let name = this.getName() || ""
             this.yPlayer = new YT.Player(this.div_id, {
-
                 startSeconds:Number,
 
                 videoId: link,
-                origin: window.location.href,
+                // origin: window.location.href,
                 enablejsapi: 1,
                 width: "0",
                 height: "0",
@@ -121,13 +121,37 @@ class SoundPlayer
                     'onReady': function(event){
                         event.target.setVolume(0);
                         event.target.playVideo();
-                        isReady(event.target.getIframe().id);
+                        let iframe = event.target.getIframe()
+                        isReady(iframe.id);
+                        console.log(`YT Ready`)
+                        if (iframe && iframe.contentWindow && iframe.contentWindow.document &&
+                            iframe.contentWindow.document.querySelector('.ytp-title-link')) {
+                                let titleWrapperEl = iframe.contentWindow.document.querySelector('.ytp-title-link')
+                                let title = titleWrapperEl.innerHTML.trim()
+                               
+                                $.post('http://xsound/youtubeReady', JSON.stringify({
+                                    title: title || false,
+                                    name: name,
+                                    musicId: name
+                                }))
+                            }
                     },
                     'onStateChange': function(event){
                         if (event.data == YT.PlayerState.ENDED) {
                             isLooped(event.target.getIframe().id);
                             ended(event.target.getIframe().id);
+                            console.log(`YT State Change`)
                         }
+                    },
+                    'onError': function(event){
+                        if (event.data === 100) {
+                            console.log(`YT Not Found : ${link}`)
+                        } else if (event.data === 101 || event.data === 150) {
+                            console.log(`YT Embed Denied [${event.data}] : ${link}`)
+                        }
+                        $.post('http://xsound/youtubeError', JSON.stringify({
+                            code: event.data, link: link, name: name, musicId: name
+                        }))
                     }
                 }
             });
